@@ -31,7 +31,9 @@ const startServer = async () => {
     server.listen(PORT, () => {
       console.log("Server running on port " + PORT);
     });
-
+    setInterval(() => {
+  simulateMatches();
+}, 180000); // every 3 minutes
   } catch (error) {
     console.error("Startup error:", error);
   }
