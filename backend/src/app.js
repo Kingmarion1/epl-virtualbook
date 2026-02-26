@@ -68,4 +68,6 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.use("/api/matches", require("./routes/matchRoutes"));
+
 module.exports = app;
