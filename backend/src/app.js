@@ -11,6 +11,8 @@ Global Middleware
 ===========================
 */
 
+app.use("/api/auth", require("./routes/authRoutes"));
+
 // Security headers
 app.use(helmet());
 
