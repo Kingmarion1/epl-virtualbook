@@ -11,8 +11,6 @@ Global Middleware
 ===========================
 */
 
-app.use("/api/auth", require("./routes/authRoutes"));
-
 // Security headers
 app.use(helmet());
 
@@ -43,6 +41,8 @@ app.get("/api/health", (req, res) => {
     message: "EPL VirtualBook Backend Running"
   });
 });
+
+app.use("/api/auth", require("./routes/authRoutes"));
 
 /*
 ===========================
