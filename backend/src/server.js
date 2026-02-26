@@ -1,3 +1,5 @@
+const simulateMatches = require("./engine/matchSimulator");
+
 const generateSeason = require("./engine/seasonGenerator");
 
 require("dotenv").config({ path: "../../.env" });
