@@ -1,3 +1,5 @@
+const generateSeason = require("./engine/seasonGenerator");
+
 require("dotenv").config({ path: "../../.env" });
 
 const http = require("http");
