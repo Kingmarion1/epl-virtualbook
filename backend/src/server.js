@@ -10,18 +10,29 @@ const connectDB = require("./config/db");
 
 const PORT = process.env.PORT || 5000;
 
-connectDB();
+const startServer = async () => {
+  try {
+    await connectDB(); // wait for DB
 
-const server = http.createServer(app);
+    await generateSeason(); // 🔥 generate season AFTER DB connects
 
-const io = new Server(server, {
-  cors: { origin: "*" }
-});
+    const server = http.createServer(app);
 
-io.on("connection", (socket) => {
-  console.log("Client connected:", socket.id);
-});
+    const io = new Server(server, {
+      cors: { origin: "*" }
+    });
 
-server.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+    io.on("connection", (socket) => {
+      console.log("Client connected:", socket.id);
+    });
+
+    server.listen(PORT, () => {
+      console.log("Server running on port " + PORT);
+    });
+
+  } catch (error) {
+    console.error("Startup error:", error);
+  }
+};
+
+startServer();
