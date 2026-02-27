@@ -1,5 +1,5 @@
 function Leaderboard() {
-  return <h1 style={{ padding: 30 }}>Leaderboard Page</h1>;
+  return <h1 style={{ padding: 30 }}>Leaderboard</h1>;
 }
 
 export default Leaderboard;
