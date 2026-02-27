@@ -76,4 +76,6 @@ app.use("/api/bets", require("./routes/betRoutes"));
 
 app.use("/api/matches", require("./routes/matchRoutes"));
 
+app.use("/api/leaderboard", require("./routes/leaderboardRoutes"));
+
 module.exports = app;
