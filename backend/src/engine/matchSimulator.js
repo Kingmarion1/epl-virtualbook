@@ -1,3 +1,4 @@
+const Standing = require("../models/Standing");
 const Match = require("../models/Match");
 const Bet = require("../models/Bet");
 const User = require("../models/User");
