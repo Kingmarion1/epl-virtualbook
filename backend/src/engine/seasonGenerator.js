@@ -1,3 +1,4 @@
+const Standing = require("../models/Standing");
 const Team = require("../models/Team");
 const Match = require("../models/Match");
 
@@ -49,6 +50,11 @@ async function generateSeason() {
   await Match.deleteMany();
 
   const createdTeams = await Team.insertMany(teamsData);
+  await Standing.deleteMany();
+
+for (let team of createdTeams) {
+  await Standing.create({ team: team._id });
+  }
 
   let matchweek = 1;
 
