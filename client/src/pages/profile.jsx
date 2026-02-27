@@ -1,4 +1,4 @@
-function Profile() {
+function profile() {
   return <h1 style={{ padding: 30 }}>My Profile</h1>;
 }
 
