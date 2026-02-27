@@ -68,6 +68,8 @@ app.use((err, req, res, next) => {
   });
 });
 
+app.use("/api/users", require("./routes/userRoutes"));
+
 app.use("/api/standings", require("./routes/standingRoutes"));
 
 app.use("/api/bets", require("./routes/betRoutes"));
