@@ -13,7 +13,7 @@ async function settleBets(match, result) {
   const bets = await Bet.find({ match: match._id, status: "pending" });
 
   for (let bet of bets) {
-    const user = await User.findById(bet.user);
+    const user = await Use.findById(bet.user);
 
     if (!user) continue;
 
