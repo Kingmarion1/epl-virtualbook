@@ -4,37 +4,43 @@ const User = require("../models/User");
 
 exports.placeBet = async (req, res) => {
   try {
-    const { matchId, amount, prediction } = req.body;
+    const { matchId, betType, stake } = req.body;
+    const userId = req.user.id;
 
-    const user = await User.findById(req.user.id);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    if (user.balance < amount)
-      return res.status(400).json({ message: "Insufficient balance" });
-
+    const user = await User.findById(userId);
     const match = await Match.findById(matchId);
-    if (!match || match.status !== "upcoming")
+
+    if (!match || match.status !== "upcoming") {
       return res.status(400).json({ message: "Match not available" });
+    }
+
+    if (user.balance < stake) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
 
     let odds;
-    if (prediction === "home") odds = match.homeOdds;
-    if (prediction === "draw") odds = match.drawOdds;
-    if (prediction === "away") odds = match.awayOdds;
 
-    const bet = await Bet.create({
-      user: user._id,
-      match: match._id,
-      amount,
-      prediction,
-      odds
-    });
+    if (betType === "home") odds = match.homeOdds;
+    if (betType === "draw") odds = match.drawOdds;
+    if (betType === "away") odds = match.awayOdds;
 
-    user.balance -= amount;
+    const potentialWin = stake * odds;
+
+    user.balance -= stake;
     await user.save();
 
-    res.json({ message: "Bet placed successfully", bet });
+    const bet = await Bet.create({
+      user: userId,
+      match: matchId,
+      betType,
+      odds,
+      stake,
+      potentialWin
+    });
 
-  } catch (error) {
-    res.status(500).json({ message: "Error placing bet" });
+    res.status(201).json(bet);
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
