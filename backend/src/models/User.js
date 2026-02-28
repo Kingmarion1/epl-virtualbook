@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
     },
     balance: {
       type: Number,
-      default: 1000 // Starting virtual $ balance
+      default: 100000 // Starting virtual $ balance
     },
     role: {
       type: String,
