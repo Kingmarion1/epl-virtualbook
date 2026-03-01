@@ -1,91 +1,87 @@
-const Standing = require("../models/Standing");
 const Team = require("../models/Team");
 const Match = require("../models/Match");
 
-const teamsData = [
-  { name: "Arsenal", strength: 90 },
-  { name: "Manchester City", strength: 93 },
-  { name: "Liverpool", strength: 90 },
-  { name: "Chelsea", strength: 89 },
-  { name: "Manchester United", strength: 86 },
-  { name: "Tottenham", strength: 83 },
-  { name: "Newcastle", strength: 84 },
-  { name: "Brighton", strength: 80 },
-  { name: "West Ham", strength: 75 },
-  { name: "Aston Villa", strength: 81 },
-  { name: "Everton", strength: 77 },
-  { name: "Wolves", strength: 75 },
-  { name: "Crystal Palace", strength: 77 },
-  { name: "Brentford", strength: 79 },
-  { name: "Fulham", strength: 78 },
-  { name: "Bournemouth", strength: 78 },
-  { name: "Burnley", strength: 74 },
-  { name: "Leed United", strength: 70 },
-  { name: "Sunderland", strength: 73 },
-  { name: "Nottingham Forest", strength: 76 }
-];
-
-function calculateOdds(homeStrength, awayStrength) {
-  const total = homeStrength + awayStrength;
-
-  const homeProb = homeStrength / total;
-  const awayProb = awayStrength / total;
-  const drawProb = 0.2;
-
-  return {
-    homeOdds: (1 / homeProb).toFixed(2),
-    drawOdds: (1 / drawProb).toFixed(2),
-    awayOdds: (1 / awayProb).toFixed(2)
-  };
-}
-
-async function generateSeason() {
-  const existingMatches = await Match.countDocuments();
-  if (existingMatches > 0) {
-    console.log("Season already exists");
-    return;
-  }
-
-  await Team.deleteMany();
-  await Match.deleteMany();
-
-  const createdTeams = await Team.insertMany(teamsData);
-  await Standing.deleteMany();
-
-for (let team of createdTeams) {
-  await Standing.create({ team: team._id });
-  }
-
-  let matchweek = 1;
-
-  for (let i = 0; i < createdTeams.length; i++) {
-    for (let j = i + 1; j < createdTeams.length; j++) {
-
-      const homeTeam = createdTeams[i];
-      const awayTeam = createdTeams[j];
-
-      const odds1 = calculateOdds(homeTeam.strength, awayTeam.strength);
-      const odds2 = calculateOdds(awayTeam.strength, homeTeam.strength);
-
-      await Match.create({
-        homeTeam: homeTeam._id,
-        awayTeam: awayTeam._id,
-        ...odds1,
-        matchweek
-      });
-
-      await Match.create({
-        homeTeam: awayTeam._id,
-        awayTeam: homeTeam._id,
-        ...odds2,
-        matchweek
-      });
-
-      matchweek++;
+const generateSeason = async () => {
+  try {
+    const existingMatches = await Match.countDocuments();
+    if (existingMatches > 0) {
+      console.log("Season already exists");
+      return;
     }
-  }
 
-  console.log("Full EPL season generated");
-}
+    // ----- Ensure teams exist -----
+    const existingTeams = await Team.find();
+    let teams = existingTeams;
+
+    if (teams.length !== 20) {
+      console.log("Inserting 20 default teams...");
+
+      const defaultTeams = [
+        { name: "Arsenal", strength: 91 },
+        { name: "Chelsea", strength: 89 },
+        { name: "Liverpool", strength: 90 },
+        { name: "Manchester City", strength: 92 },
+        { name: "Manchester United", strength: 88 },
+        { name: "Tottenham", strength: 84 },
+        { name: "burnly", strength: 76 },
+        { name: "Everton", strength: 79 },
+        { name: "Wolves", strength: 76 },
+        { name: "West Ham", strength: 76 },
+        { name: "Aston Villa", strength: 86 },
+        { name: "Sunderland", strength: 74 },
+        { name: "Brighton", strength: 78 },
+        { name: "Newcastle", strength: 85 },
+        { name: "Crystal Palace", strength: 77 },
+        { name: "Brentford", strength: 78 },
+        { name: "Leeds", strength: 73 },
+        { name: "Bournemouth", strength: 78 },
+        { name: "Fulham", strength: 77 },
+        { name: "Nottingham Forest", strength: 74 }
+      ];
+
+      teams = await Team.insertMany(defaultTeams);
+    }
+
+    const teamIds = teams.map(t => t._id);
+
+    // ----- Round Robin Logic -----
+    const totalWeeks = 38;
+    const matchesPerWeek = 10;
+    let rotating = [...teamIds];
+    const fixed = rotating.shift(); // keep first team fixed
+
+    for (let week = 1; week <= totalWeeks; week++) {
+      const weekMatches = [];
+      const current = [fixed, ...rotating];
+
+      for (let i = 0; i < matchesPerWeek; i++) {
+        const home = current[i];
+        const away = current[current.length - 1 - i];
+
+        const isSecondHalf = week > 19;
+
+        weekMatches.push({
+          homeTeam: isSecondHalf ? away : home,
+          awayTeam: isSecondHalf ? home : away,
+          homeOdds: (1.5 + Math.random() * 2).toFixed(2),
+          drawOdds: (2.5 + Math.random() * 2).toFixed(2),
+          awayOdds: (1.5 + Math.random() * 2).toFixed(2),
+          matchweek: week,
+          status: "upcoming"
+        });
+      }
+
+      await Match.insertMany(weekMatches);
+
+      // Rotate teams except fixed
+      rotating.unshift(rotating.pop());
+    }
+
+    console.log("Full 38-week season generated ✅");
+
+  } catch (err) {
+    console.error("Season generation error:", err);
+  }
+};
 
 module.exports = generateSeason;
